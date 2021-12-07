@@ -1,9 +1,7 @@
 ﻿using DataContext.Models;
 using FluentAssertions;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using VacationRental.Models;
 using Xunit;

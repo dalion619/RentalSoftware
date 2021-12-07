@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Mod\**" />
+    <EmbeddedResource Remove="Mod\**" />
+    <None Remove="Mod\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DataContext\DataContext.csproj" />
   </ItemGroup>
 

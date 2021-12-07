@@ -38,9 +38,10 @@ namespace VacationRental
             services.AddAutoMapper(typeof(Startup));
             services.AddSwaggerGen(opts => opts.SwaggerDoc("v1", new OpenApiInfo { Title = "VacationRental API", Version = "v1" }));
 
-            services.AddSingleton<IUnitOfWork, UnitOfWork>();
-            services.AddSingleton<IBookingService, BookingService>();
-            services.AddSingleton<IRentalService, RentalService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IBookingService, BookingService>();
+            services.AddScoped<IRentalService, RentalService>();
+            services.AddScoped<ICalendarService, CalendarService>();
 
         }
 

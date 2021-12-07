@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
+using Services.Models;
 using System;
 using System.Threading.Tasks;
 using VacationRental.Models;
@@ -14,12 +15,14 @@ namespace VacationRental.Controllers
         public IMapper Mapper;
         public IBookingService _bookingService;
         public IRentalService _rentalService;
+        public ICalendarService _calendarService;
 
-        public CalendarController(IMapper mapper, IBookingService bookingService, IRentalService rentalService)
+        public CalendarController(IMapper mapper, IBookingService bookingService, IRentalService rentalService, ICalendarService calendarService)
         {
             Mapper = mapper;
             _bookingService = bookingService;
             _rentalService = rentalService;
+            _calendarService = calendarService;
         }
 
         /// <summary>
@@ -40,7 +43,9 @@ namespace VacationRental.Controllers
 
             var bookings = _bookingService.GetByRentalId(rentalId);
 
-            return new CalendarViewModel(rentalId, bookings, rental.PreparationTimeInDays, start, nights);
+            //return new CalendarViewModel(rentalId, bookings, rental.PreparationTimeInDays, start, nights);
+
+            return _calendarService.GetCalendar(rentalId, bookings, rental.PreparationTimeInDays, start, nights);
         }
     }
 }

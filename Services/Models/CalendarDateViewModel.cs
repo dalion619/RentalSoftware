@@ -1,8 +1,7 @@
-﻿using Services.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace VacationRental.Models
+namespace Services.Models
 {
     public class CalendarDateViewModel
     {
