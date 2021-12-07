@@ -36,7 +36,7 @@ namespace VacationRental
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddAutoMapper(typeof(Startup));
-            services.AddSwaggerGen(opts => opts.SwaggerDoc("v1", new OpenApiInfo { Title = "Vacation rental information", Version = "v1" }));
+            services.AddSwaggerGen(opts => opts.SwaggerDoc("v1", new OpenApiInfo { Title = "VacationRental API", Version = "v1" }));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IBookingService, BookingService>();
@@ -51,14 +51,14 @@ namespace VacationRental
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseGlobalExceptionMiddleware();
-            }
+            //else
+            //{
+            //    app.UseGlobalExceptionMiddleware();
+            //}
 
             app.UseSwagger();
             app.UseSwaggerUI(opts => {
-                opts.SwaggerEndpoint("/swagger/v1/swagger.json", "VacationRental v1");
+                opts.SwaggerEndpoint("/swagger/v1/swagger.json", "VacationRental API v1");
                 opts.RoutePrefix = "swagger";
             });
 

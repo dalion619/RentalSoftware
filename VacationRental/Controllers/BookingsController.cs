@@ -55,7 +55,7 @@ namespace VacationRental.Controllers
 
             var bookingId = 0;
                 
-            if (await _bookingService.IsFree(model.Start, model.Start.AddDays(model.Nights), model.RentalId))
+            if (await _bookingService.IsFree(model.RentalId, model.Start, model.Start.AddDays(model.Nights)))
             {
                 var booking = Mapper.Map<Booking>(model);
                 booking.Unit = await _bookingService.GetFreeUnit(model.RentalId, model.Start, model.Start.AddDays(model.Nights));
@@ -68,5 +68,6 @@ namespace VacationRental.Controllers
 
             return new ResourceIdViewModel(bookingId);
         }
+
     }
 }

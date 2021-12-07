@@ -54,7 +54,7 @@ namespace VacationRental.Tests
             {
                 getBookingResponse.EnsureSuccessStatusCode();
                 var getBookingResult = await getBookingResponse.Content.ReadAsAsync<BookingViewModel>();
-                postBookingRequest.RentalId.Should().Be(getBookingResult.RentalId);
+                postBookingRequest.RentalId.Should().Be(getBookingResult.RentalId); //Expected postBookingRequest.RentalId to be 1, but found 2.
                 postBookingRequest.Nights.Should().Be(getBookingResult.Nights);
                 postBookingRequest.Start.Should().Be(getBookingResult.Start);
             }
@@ -94,6 +94,7 @@ namespace VacationRental.Tests
                 Nights = 1,
                 Start = new DateTime(2002, 01, 02)
             };
+
 
             Func<Task> postBooking2Response = async () => await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking2Request);
 

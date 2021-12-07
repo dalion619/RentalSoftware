@@ -37,17 +37,27 @@ namespace VacationRental.Controllers
              return Mapper.Map<RentalViewModel>(rental);
         }
 
-        [HttpPost]
+        //[HttpPost]
         //[Route("api/v1/rentals")]
         //[Route("~/api/v1/vacationrental/rentals")]
+        //public async Task<IActionResult> Post(RentalBindingModel model)
+        //{
+        //    var rentalId = await _rentalService.Create(Mapper.Map<Rental>(model));
+        //    Response.StatusCode = 200;
+        //    return Ok(new ResourceIdViewModel(rentalId));
+        //}
+
+        [HttpPost]
+        [Route("api/v1/rentals")]
+        [Route("~/api/v1/vacationrental/rentals")]
         public async Task<IActionResult> Post(RentalBindingModel model)
         {
-            var rentalId = await _rentalService.Create(Mapper.Map<Rental>(model));
-            return Ok(rentalId);
+            var rental = await _rentalService.Create(Mapper.Map<Rental>(model));
+            return Ok(new ResourceIdViewModel(rental.Id));
         }
 
         [HttpPut]
-        //[Route("~/api/v1/vacationrental/rentals/{rentalId:int}")]
+        [Route("~/api/v1/vacationrental/rentals/{rentalId:int}")]
         public async void Put(int rentalId, RentalBindingModel model)
         {
             var exists = await _rentalService.GetRentalById(rentalId);

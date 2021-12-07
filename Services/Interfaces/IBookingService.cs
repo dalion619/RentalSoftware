@@ -8,10 +8,10 @@ namespace Services.Interfaces
     public interface IBookingService
     {
         Task<int> Create(Booking booking);
-        List<Booking> GetByRentalId(int rentalId);
         Task<Booking> GetByBookingId(int bookingId);
-        Task<List<Booking>> GetByRentalAndDate(DateTime startDate, DateTime endDate, int rentalId);
-        Task<int> GetFreeUnit(int rentalId, DateTime startDate, DateTime endDate);
-        Task<bool> IsFree(DateTime startDate, DateTime endDate, int rentalId);
+        Task<IEnumerable<Booking>> GetByRentalAndDate(int rentalId, DateTime startDate, DateTime endDate);
+        IEnumerable<Booking> GetByRentalId(int rentalId);
+        Task<int> GetFreeUnit(int rentalId, DateTime start, DateTime end);
+        Task<bool> IsFree(int rentalId, DateTime start, DateTime end);
     }
 }
