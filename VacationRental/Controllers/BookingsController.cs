@@ -28,8 +28,7 @@ namespace VacationRental.Controllers
         /// </summary>
         /// <param name="bookingId"></param>
         /// <returns>Returns a BookingViewModel object</returns>
-        [HttpGet]
-        [Route("{bookingId:int}")]
+        [HttpGet("{bookingId:int}")]
         public async Task<BookingViewModel> Get(int bookingId)
         {
             var booking = await _bookingService.GetByBookingId(bookingId);

@@ -38,9 +38,9 @@ namespace VacationRental
             services.AddAutoMapper(typeof(Startup));
             services.AddSwaggerGen(opts => opts.SwaggerDoc("v1", new OpenApiInfo { Title = "VacationRental API", Version = "v1" }));
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IBookingService, BookingService>();
-            services.AddScoped<IRentalService, RentalService>();
+            services.AddSingleton<IUnitOfWork, UnitOfWork>();
+            services.AddSingleton<IBookingService, BookingService>();
+            services.AddSingleton<IRentalService, RentalService>();
 
         }
 
@@ -59,7 +59,7 @@ namespace VacationRental
             app.UseSwagger();
             app.UseSwaggerUI(opts => {
                 opts.SwaggerEndpoint("/swagger/v1/swagger.json", "VacationRental API v1");
-                opts.RoutePrefix = "swagger";
+                opts.RoutePrefix = string.Empty;
             });
 
             app.UseHttpsRedirection();

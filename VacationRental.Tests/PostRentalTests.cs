@@ -33,7 +33,7 @@ namespace VacationRental.Tests
             };
 
             ResourceIdViewModel postResult;
-            using (var postResponse = await _client.PostAsJsonAsync($"/api/v1/vacationrental/rentals", request))
+            using (var postResponse = await _client.PostAsJsonAsync($"/api/v1/rentals", request))
             {
                 postResponse.EnsureSuccessStatusCode();
                 _testOutputHelper.WriteLine(postResponse.StatusCode.ToString());

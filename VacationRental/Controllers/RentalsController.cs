@@ -48,16 +48,15 @@ namespace VacationRental.Controllers
         //}
 
         [HttpPost]
-        [Route("api/v1/rentals")]
-        [Route("~/api/v1/vacationrental/rentals")]
         public async Task<IActionResult> Post(RentalBindingModel model)
         {
             var rental = await _rentalService.Create(Mapper.Map<Rental>(model));
             return Ok(new ResourceIdViewModel(rental.Id));
         }
 
+
         [HttpPut]
-        [Route("~/api/v1/vacationrental/rentals/{rentalId:int}")]
+        [Route("~/api/v1/rentals/{rentalId:int}")]
         public async void Put(int rentalId, RentalBindingModel model)
         {
             var exists = await _rentalService.GetRentalById(rentalId);
