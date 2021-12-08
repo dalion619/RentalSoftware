@@ -1,54 +1,95 @@
 ﻿using DataContext.Models;
+using Services.Contracts.Request;
+using Services.Contracts.Response;
 using Services.Interfaces;
 using Services.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace Services
 {
     public class CalendarService : ICalendarService
     {
-        public CalendarViewModel GetCalendar(int rentalId, IEnumerable<Booking> bookings, int preparationTimeInDays, DateTime startDate, int nights)
+        private IBookingService _bookingService;
+        private IRentalService _rentalService;
+
+        public CalendarService(IBookingService bookingService, IRentalService rentalService)
         {
-            CalendarViewModel model = new CalendarViewModel
+            _bookingService = bookingService;
+            _rentalService = rentalService;
+        }
+
+        public async Task<GetCalendarResponse> GetCalendar(GetCalendarRequest request)
+        {
+            GetCalendarResponse response = new GetCalendarResponse();
+
+            try
             {
-                RentalId = rentalId,
-                Dates = new List<CalendarDateViewModel>()
-            };
-
-            var endDate = startDate.AddDays(nights - 1);
-            var dateList = Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days).Select(offset => startDate.AddDays(offset));
-
-            model.Dates = dateList.Select(x => new CalendarDateViewModel(x)).ToList();
-
-            var unit = 1;
-
-            foreach (var b in bookings)
-            {
-                for (int i = 0; i < b.Nights; i++)
+                if (request.NumberOfNights < 0) //If user has entered 0 nights
                 {
-                    var date = model.Dates.FirstOrDefault(x => x.Date == b.Start.AddDays(i));
-                    if (date is null) continue;
-
-                    date.Bookings.Add(new CalendarBookingViewModel(b.Id, unit));
+                    response.Message = "Nights must be positive";
+                    response.Succeeded = false;
+                    return response;
                 }
 
-                for (int i = b.Nights + 1; i < b.Nights + 1 + preparationTimeInDays; i++)
-                {
-                    var date = model.Dates.FirstOrDefault(x => x.Date == b.Start.AddDays(i) || x.Date.AddDays(i) == b.Start.AddDays(i));
-                    if (date is null) continue;
+                var rentals = await _rentalService.GetAll();
 
-                    model.Dates.FirstOrDefault(x => x.Date == date.Date.AddDays(i))?.PreparationTimes.Add(new UnitViewModel(unit));
+                if (rentals.Where(w => w.Id == request.RentalId).Count() == 0) //If there are no rentals available with that Id
+                {
+                    response.Message = "Not Found";
+                    response.Succeeded = false;
+                    return response;
                 }
 
-                unit++;
+                CalendarViewModel calendarViewModel = new CalendarViewModel
+                {
+                    RentalId = request.RentalId,
+                    Dates = new List<CalendarDateViewModel>()
+                };
+
+                for (var i = 0; i < request.NumberOfNights; i++) //for each booking night
+                {
+                    CalendarDateViewModel calendarDateViewModel = new CalendarDateViewModel
+                    {
+                        Date = request.BookingStartDate.Date.AddDays(i),
+                        Bookings = new List<CalendarBookingViewModel>(),
+                        PreparationTimes = new List<PreparationTimesViewModel>()
+                    };
+
+                    var rental = await _rentalService.GetByRentalId(request.RentalId); //get the preparation days
+                    var preparationTimeInDays = rental.PreparationTimeInDays;
+                    var bookings = await _bookingService.GetAll(); //get all bookings
+
+                    foreach (var booking in bookings.Where(x => x.Id == request.RentalId)) //for each actual booking with this rental Id
+                    {
+
+                        if (calendarDateViewModel.Date >= booking.Start && calendarDateViewModel.Date < booking.Start.AddDays(booking.Nights))
+                        {
+                            calendarDateViewModel.Bookings.Add(new CalendarBookingViewModel { Id = booking.Id, Unit = 1 });
+                        }
+
+                        if (calendarDateViewModel.Date >= booking.Start.AddDays(booking.Nights) && calendarDateViewModel.Date < booking.Start.AddDays(booking.Nights + preparationTimeInDays))
+                        {
+                            calendarDateViewModel.PreparationTimes.Add(new PreparationTimesViewModel { Unit = 1 });
+                        }
+                    }
+
+                    calendarViewModel.Dates.Add(calendarDateViewModel);
+                }
+
+                response.CalendarViewModel = calendarViewModel;
+                response.Succeeded = true;
+
+            }
+            catch (Exception ex)
+            {
+                response.Succeeded = false;
+                response.Message = ex.Message;
             }
 
-            model.Dates = model.Dates.OrderBy(x => x.Date).ToList();
-
-            return model;
+            return response;
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using DataContext.Models;
 using DataContext.UnitOfWork;
+using Services.Contracts.Request;
+using Services.Contracts.Response;
 using Services.Interfaces;
+using Services.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,55 +21,125 @@ namespace Services
             _unitOfWork = unitOfWork;
             _rentalService = rentalService;
         }
-        public async Task<bool> IsFree(int rentalId, DateTime start, DateTime end)
+
+        public async Task<AddBookingResponse> AddBooking(AddBookingRequest request)
         {
-            var rental = await _rentalService.GetRentalById(rentalId);
-            var bookings = await GetByRentalAndDate(rentalId, start, end);
-            return rental.Units > bookings.Count();
+            AddBookingResponse response = new AddBookingResponse();
+
+            try
+            {
+                if (request.NumberOfNigths < 0)
+                {
+                    response.Message = "Nights must be positive";
+                    response.ResourceIdViewModel = new ResourceIdViewModel() { Id = -2 };
+                    response.Succeeded = false;
+                    return response;
+                }
+
+                var rental = await _rentalService.GetByRentalId(request.RentalId); //I need to make sure that when I retrieve this rental that a list of bookings comes attached too.
+
+                if (rental == null)
+                {
+                    response.Message = "Rental not found";
+                    response.ResourceIdViewModel = new ResourceIdViewModel() { Id = -2 };
+                    response.Succeeded = false;
+                    return response;
+                }
+
+                for (var i = 0; i < request.NumberOfNigths; i++)
+                {
+                    var count = 0;
+
+                    foreach (var bookingItem in rental.BookingCollection) //I need get my collection of bookings into here.  Basically this is just an iteration of every booking in
+                                                                          //this rental that is already in storage in this rental plain and simple.
+                    {
+                        if ((bookingItem.Start <= request.StartDate.Date && bookingItem.Start.AddDays(bookingItem.Nights + rental.PreparationTimeInDays) > request.StartDate.Date)
+                            || (bookingItem.Start < request.StartDate.AddDays(request.NumberOfNigths + rental.PreparationTimeInDays) && bookingItem.Start.AddDays(bookingItem.Nights + rental.PreparationTimeInDays) >= request.StartDate.AddDays(request.NumberOfNigths + rental.PreparationTimeInDays))
+                            || (bookingItem.Start > request.StartDate && bookingItem.Start.AddDays(bookingItem.Nights + rental.PreparationTimeInDays) < request.StartDate.AddDays(request.NumberOfNigths + rental.PreparationTimeInDays)))
+                        {
+                            count++;
+                        }
+                    }
+
+                    var rental2 = await _rentalService.GetByRentalId(request.RentalId); //This is basically to get the number of units available in this rental
+                    var rentalUnits = rental2.Units;
+
+                    //if (count >= _iRentalRepository.GetById(request.RentalId).Units)
+
+
+                    if (count >= rentalUnits) //And if more bookings are put against how many units are available the request fails.
+                    {
+                        response.Message = "Not available";
+                        response.ResourceIdViewModel = new ResourceIdViewModel() { Id = -2 };
+                        response.Succeeded = false;
+                        return response;
+                    }
+                }
+
+                Booking booking = new Booking()
+                {
+                    RentalId = request.RentalId,
+                    Nights = request.NumberOfNigths,
+                    Start = request.StartDate.Date,
+                    //Rental = rental //Once you add this, it throws a massive fucking error about duplicate entry.
+                };
+
+                await _unitOfWork.BookingRepository.AddAsync(booking);
+                await _unitOfWork.Complete();
+
+                response.Succeeded = true;
+                response.ResourceIdViewModel = new ResourceIdViewModel() { Id = booking.Id };
+
+            }
+            catch (Exception exception)
+            {
+                response.Succeeded = false;
+                response.Message = exception.Message;
+                response.ResourceIdViewModel = new ResourceIdViewModel() { Id = -1 };
+            }
+
+            return response;
         }
 
-        public IEnumerable<Booking> GetByRentalId(int rentalId)
+        public async Task<GetBookingResponse> GetBooking(GetBookingRequest request)
         {
-            var bookings = _unitOfWork.BookingRepository.Find(x => x.RentalId == rentalId);
-            return bookings;
+            GetBookingResponse response = new GetBookingResponse();
+
+            try
+            {
+                var booking = await _unitOfWork.BookingRepository.GetByIdAsync(request.bookingId);
+
+                if (booking == null)
+                {
+                    response.Succeeded = false;
+                    response.Message = "Booking not found";
+                    return response;
+                }
+
+                response.Succeeded = true;
+
+                BookingViewModel bookingViewModel = new BookingViewModel
+                {
+                    Id = booking.Id,
+                    Nights = booking.Nights,
+                    RentalId = booking.RentalId,
+                    Start = booking.Start
+                };
+
+                response.BookingViewModel = bookingViewModel;
+            }
+            catch (Exception exception)
+            {
+                response.Succeeded = false;
+                response.Message = exception.Message;
+            }
+
+            return response;
         }
 
-        public async Task<IEnumerable<Booking>> GetByRentalAndDate(int rentalId, DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<Booking>> GetAll()
         {
-            var rental = await _rentalService.GetRentalById(rentalId);
-            var bookings = await _unitOfWork.BookingRepository.GetAll();
-
-            bookings = bookings.Where(x => x.RentalId == rentalId &&
-                                       x.Start <= endDate &&
-                                       startDate <= x.Start.AddDays(x.Nights + rental.PreparationTimeInDays)).ToList();
-
-            return bookings.ToList();
+            return await _unitOfWork.BookingRepository.GetAll();
         }
-
-        public async Task<int> GetFreeUnit(int rentalId, DateTime start, DateTime end)
-        {
-            var bookings = await GetByRentalAndDate(rentalId, start, end);
-            if (bookings.Any())
-                return bookings.Max(x => x.Unit) + 1;
-            else return 1;
-        }
-
-
-
-        public async Task<Booking> GetByBookingId(int bookingId)
-        {
-            return await _unitOfWork.BookingRepository.Get(bookingId);
-        }
-
-
-        public async Task<int> Create(Booking booking)
-        {
-            await _unitOfWork.BookingRepository.AddAsync(booking);
-            return await _unitOfWork.Complete();
-        }
-
-
-
-
     }
 }

@@ -27,14 +27,13 @@ namespace VacationRental.Tests
         {
             var postRentalRequest = new RentalBindingModel
             {
-                Units = 2,
-                PreparationTimeInDays = 1
+                Units = 2
             };
 
             ResourceIdViewModel postRentalResult;
             using (var postRentalResponse = await _client.PostAsJsonAsync($"/api/v1/rentals", postRentalRequest))
             {
-                postRentalResponse.EnsureSuccessStatusCode();
+                Assert.True(postRentalResponse.IsSuccessStatusCode);
                 postRentalResult = await postRentalResponse.Content.ReadAsAsync<ResourceIdViewModel>();
             }
 
@@ -48,7 +47,7 @@ namespace VacationRental.Tests
             ResourceIdViewModel postBooking1Result;
             using (var postBooking1Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking1Request))
             {
-                postBooking1Response.EnsureSuccessStatusCode();
+                Assert.True(postBooking1Response.IsSuccessStatusCode);
                 postBooking1Result = await postBooking1Response.Content.ReadAsAsync<ResourceIdViewModel>();
             }
 
@@ -62,7 +61,7 @@ namespace VacationRental.Tests
             ResourceIdViewModel postBooking2Result;
             using (var postBooking2Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking2Request))
             {
-                postBooking2Response.EnsureSuccessStatusCode();
+                Assert.True(postBooking2Response.IsSuccessStatusCode);
                 postBooking2Result = await postBooking2Response.Content.ReadAsAsync<ResourceIdViewModel>();
             }
 
@@ -83,13 +82,13 @@ namespace VacationRental.Tests
                 Assert.Contains(getCalendarResult.Dates[1].Bookings, x => x.Id == postBooking1Result.Id);
 
                 Assert.Equal(new DateTime(2000, 01, 03), getCalendarResult.Dates[2].Date);
-                Assert.Equal(2, getCalendarResult.Dates[2].Bookings.Count);
+                Assert.Equal(2, getCalendarResult.Dates[2].Bookings.Count);                        //There's a problem here with the count
                 Assert.Contains(getCalendarResult.Dates[2].Bookings, x => x.Id == postBooking1Result.Id);
                 Assert.Contains(getCalendarResult.Dates[2].Bookings, x => x.Id == postBooking2Result.Id);
 
                 Assert.Equal(new DateTime(2000, 01, 04), getCalendarResult.Dates[3].Date);
                 Assert.Single(getCalendarResult.Dates[3].Bookings);
-                //Assert.Contains(getCalendarResult.Dates[3].Bookings, x => x.Id == postBooking2Result.Id);
+                Assert.Contains(getCalendarResult.Dates[3].Bookings, x => x.Id == postBooking2Result.Id);
 
                 Assert.Equal(new DateTime(2000, 01, 05), getCalendarResult.Dates[4].Date);
                 Assert.Empty(getCalendarResult.Dates[4].Bookings);

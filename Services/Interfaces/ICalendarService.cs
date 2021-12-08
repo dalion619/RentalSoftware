@@ -1,12 +1,11 @@
-﻿using DataContext.Models;
-using Services.Models;
-using System;
-using System.Collections.Generic;
+﻿using Services.Contracts.Request;
+using Services.Contracts.Response;
+using System.Threading.Tasks;
 
 namespace Services.Interfaces
 {
     public interface ICalendarService
     {
-        CalendarViewModel GetCalendar(int rentalId, IEnumerable<Booking> bookings, int preparationTimeInDays, DateTime startDate, int nights);
+        Task<GetCalendarResponse> GetCalendar(GetCalendarRequest request);
     }
 }

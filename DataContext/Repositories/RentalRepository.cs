@@ -13,7 +13,7 @@ namespace DataContext.Repositories
         public async Task<Rental> GetRentalById(int rentalId)
         {
             return await Context.Rentals
-                    .Where(x => x.Id == rentalId).AsNoTracking()
+                    .Where(x => x.Id == rentalId).AsNoTracking() //I think I need to include bookings here
                     .FirstOrDefaultAsync();
         }
     }

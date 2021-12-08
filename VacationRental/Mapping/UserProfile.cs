@@ -1,6 +1,7 @@
 ﻿using DataContext.Models;
 using VacationRental.Models;
 using AutoMapper;
+using Services.Models;
 
 namespace VacationRental.Mapping
 {

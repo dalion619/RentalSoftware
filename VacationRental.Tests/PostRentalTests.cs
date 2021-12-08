@@ -1,5 +1,6 @@
 ﻿using DataContext.Models;
 using FluentAssertions;
+using Services.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;

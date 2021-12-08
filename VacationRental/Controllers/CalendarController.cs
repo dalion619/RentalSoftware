@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Services.Contracts.Request;
 using Services.Interfaces;
 using Services.Models;
 using System;
@@ -25,27 +26,17 @@ namespace VacationRental.Controllers
             _calendarService = calendarService;
         }
 
-        /// <summary>
-        /// Retrieve the booking information for the given query parameters
-        /// </summary>
-        /// <param name="rentalId"></param>
-        /// <param name="start"></param>
-        /// <param name="nights"></param>
-        /// <returns>Returns a CalendarViewModel object</returns>
         [HttpGet]
         public async Task<CalendarViewModel> Get(int rentalId, DateTime start, int nights)
         {
-            if (nights < 0)
-                throw new ApplicationException("Positive Nights");
-            var rental = await _rentalService.GetRentalById(rentalId);
-            if (rental is null)
-                throw new ApplicationException("Not Found");
+            var response = await _calendarService.GetCalendar(new GetCalendarRequest() { RentalId = rentalId,  BookingStartDate = start,  NumberOfNights = nights });
 
-            var bookings = _bookingService.GetByRentalId(rentalId);
+            if (!response.Succeeded)
+            {
+                throw new Exception(response.Message);
+            }
 
-            //return new CalendarViewModel(rentalId, bookings, rental.PreparationTimeInDays, start, nights);
-
-            return _calendarService.GetCalendar(rentalId, bookings, rental.PreparationTimeInDays, start, nights);
+            return response.CalendarViewModel;
         }
     }
 }

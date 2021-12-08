@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using DataContext.Models;
 using Microsoft.AspNetCore.Mvc;
+using Services.Contracts.Request;
 using Services.Interfaces;
+using Services.Models;
 using System;
 using System.Threading.Tasks;
 using VacationRental.Models;
@@ -27,72 +29,45 @@ namespace VacationRental.Controllers
         [Route("{rentalId:int}")]
         public async Task<RentalViewModel> Get(int rentalId)
         {
-            var rental = await _rentalService.GetRentalById(rentalId);
+            var rental = await _rentalService.GetRental(new GetRentalRequest() { RentalId = rentalId });
 
-            if(rental == null)
+            if (rental == null)
             {
                 throw new ApplicationException("Not Found");
             }
 
-             return Mapper.Map<RentalViewModel>(rental);
+            return rental.RentalViewModel;
         }
-
-        //[HttpPost]
-        //[Route("api/v1/rentals")]
-        //[Route("~/api/v1/vacationrental/rentals")]
-        //public async Task<IActionResult> Post(RentalBindingModel model)
-        //{
-        //    var rentalId = await _rentalService.Create(Mapper.Map<Rental>(model));
-        //    Response.StatusCode = 200;
-        //    return Ok(new ResourceIdViewModel(rentalId));
-        //}
-
-        [HttpPost]
-        public async Task<IActionResult> Post(RentalBindingModel model)
-        {
-            var rental = await _rentalService.Create(Mapper.Map<Rental>(model));
-            return Ok(new ResourceIdViewModel(rental.Id));
-        }
-
 
         [HttpPut]
-        [Route("~/api/v1/rentals/{rentalId:int}")]
-        public async void Put(int rentalId, RentalBindingModel model)
+        [Route("{rentalId:int}")]
+        public async Task<IActionResult> Put(int rentalId, RentalBindingModel model)
         {
-            var exists = await _rentalService.GetRentalById(rentalId);
+            //Use Automapper Here
+            UpdateRentalRequest updateRentalRequest = new UpdateRentalRequest() { Id = rentalId, Units = model.Units, PreparationTimeInDays = (int)model.PreparationTimeInDays };
 
-            //I do not have a test in place for this one, must create it.
-            if (exists == null)
+            var response = await _rentalService.UpdateRental(updateRentalRequest);
+
+            if (!response.Succeeded)
             {
-                throw new ApplicationException("Not Found");
+                return new JsonResult(response.Errors);
             }
 
-            var rental = new Rental()
-            {
-                Id = rentalId,
-                PreparationTimeInDays = (int)model.PreparationTimeInDays,
-                Units = model.Units
-            };
-
-            //if (originalRental.PreparationTimeInDays != model.PreparationTimeInDays)
-
-            await _rentalService.Update(rental);
-
-
-            //TO-DO:
-            //If the length of preparation time is changed then it should be updated for all existing bookings. 
-            //The request should fail if decreasing the number of units or increasing the length of preparation time will produce overlapping between 
-            //existing bookings and/or their preparation times.
-
-            //for each existing booking in this rental, add 1 extra day of preparation time.
-
+            return new JsonResult(response.Succeeded);
         }
 
-        //[Route("~/api/v1/vacationrental/rentals")]
-        //[HttpPost]
-        //public ResourceIdViewModel PostVacation(RentalBindingModel model)
-        //{
-        //    return Post(model);
-        //}
+        [HttpPost]
+        public async Task<ResourceIdViewModel> Post(RentalBindingModel model)
+        {
+            //Use Automapper Here
+            var response = await _rentalService.AddRental(new AddRentalRequest() { PreparationTimeInDays = (int)model.PreparationTimeInDays, Units = model.Units });
+
+            if (!response.Succeeded)
+            {
+                throw new Exception(response.Message);
+            }
+
+            return response.ResourceIdViewModel;
+        }
     }
 }
