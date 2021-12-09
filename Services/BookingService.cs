@@ -49,7 +49,7 @@ namespace Services
                 {
                     var count = 0;
 
-                    foreach (var bookingItem in rental.BookingCollection)
+                    foreach (var bookingItem in rental.Bookings)
                     {
                         if ((bookingItem.Start <= request.StartDate.Date && bookingItem.Start.AddDays(bookingItem.Nights + rental.PreparationTimeInDays) > request.StartDate.Date)
                             || (bookingItem.Start < request.StartDate.AddDays(request.NumberOfNigths + rental.PreparationTimeInDays) && bookingItem.Start.AddDays(bookingItem.Nights + rental.PreparationTimeInDays) >= request.StartDate.AddDays(request.NumberOfNigths + rental.PreparationTimeInDays))

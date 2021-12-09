@@ -28,7 +28,7 @@ namespace Services
 
             Rental rental = await _unitOfWork.RentalRepository.Get(request.Id);
 
-            if (rental.BookingCollection.Count() == 0 && (rental.PreparationTimeInDays == request.PreparationTimeInDays && rental.Units < request.Units))
+            if (rental.Bookings.Count() == 0 && (rental.PreparationTimeInDays == request.PreparationTimeInDays && rental.Units < request.Units))
             {
                 rental.PreparationTimeInDays = request.PreparationTimeInDays;
                 rental.Units = request.Units;
@@ -36,7 +36,7 @@ namespace Services
                 return response;
             }
 
-            foreach (var item in rental.BookingCollection)
+            foreach (var item in rental.Bookings)
             {
                 // Yet to do           
             }
@@ -50,7 +50,7 @@ namespace Services
 
             var bookings = await _unitOfWork.BookingRepository.GetAll();
 
-            rental.BookingCollection = bookings.Where(x => x.RentalId == rentalId).ToList();
+            rental.Bookings = bookings.Where(x => x.RentalId == rentalId).ToList();
 
             return rental;
         }
