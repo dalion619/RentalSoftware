@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VacationRental.Models
+namespace Services.Models
 {
     public class BookingBindingModel
     {

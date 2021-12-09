@@ -14,7 +14,6 @@ namespace DataContext.Repositories
         {
             return await Context.Bookings
                     .Where(x => x.Id == Id)
-                    //.Include(x => x.Rental)
                     .FirstOrDefaultAsync();
         }
     }

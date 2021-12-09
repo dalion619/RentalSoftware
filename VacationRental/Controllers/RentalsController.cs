@@ -60,7 +60,7 @@ namespace VacationRental.Controllers
         public async Task<ResourceIdViewModel> Post(RentalBindingModel model)
         {
             //Use Automapper Here
-            var response = await _rentalService.AddRental(new AddRentalRequest() { PreparationTimeInDays = (int)model.PreparationTimeInDays, Units = model.Units });
+            var response = await _rentalService.AddRental(new AddRentalRequest() { PreparationTimeInDays = Convert.ToInt32(model.PreparationTimeInDays), Units = model.Units });
 
             if (!response.Succeeded)
             {

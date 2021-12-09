@@ -27,7 +27,8 @@ namespace VacationRental.Tests
         {
             var postRentalRequest = new RentalBindingModel
             {
-                Units = 2
+                Units = 2,
+                PreparationTimeInDays = 2
             };
 
             ResourceIdViewModel postRentalResult;

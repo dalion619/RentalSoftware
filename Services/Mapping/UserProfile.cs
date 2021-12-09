@@ -9,6 +9,16 @@ namespace Services.Mapping
         public UserProfile()
         {
             CreateMap<Booking, BookingViewModel>();
+
+            CreateMap<BookingViewModel, Booking>();
+
+            CreateMap<Rental, RentalViewModel>();
+
+            CreateMap<RentalBindingModel, Rental>();
+
+            CreateMap<RentalViewModel, Rental>();
+            
+            CreateMap<BookingBindingModel, Booking>();
         }
     }
 }

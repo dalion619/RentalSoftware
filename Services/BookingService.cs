@@ -6,7 +6,6 @@ using Services.Interfaces;
 using Services.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Services
@@ -36,7 +35,7 @@ namespace Services
                     return response;
                 }
 
-                var rental = await _rentalService.GetByRentalId(request.RentalId); //I need to make sure that when I retrieve this rental that a list of bookings comes attached too.
+                var rental = await _rentalService.GetByRentalId(request.RentalId);
 
                 if (rental == null)
                 {
@@ -50,8 +49,7 @@ namespace Services
                 {
                     var count = 0;
 
-                    foreach (var bookingItem in rental.BookingCollection) //I need get my collection of bookings into here.  Basically this is just an iteration of every booking in
-                                                                          //this rental that is already in storage in this rental plain and simple.
+                    foreach (var bookingItem in rental.BookingCollection)
                     {
                         if ((bookingItem.Start <= request.StartDate.Date && bookingItem.Start.AddDays(bookingItem.Nights + rental.PreparationTimeInDays) > request.StartDate.Date)
                             || (bookingItem.Start < request.StartDate.AddDays(request.NumberOfNigths + rental.PreparationTimeInDays) && bookingItem.Start.AddDays(bookingItem.Nights + rental.PreparationTimeInDays) >= request.StartDate.AddDays(request.NumberOfNigths + rental.PreparationTimeInDays))
@@ -61,13 +59,10 @@ namespace Services
                         }
                     }
 
-                    var rental2 = await _rentalService.GetByRentalId(request.RentalId); //This is basically to get the number of units available in this rental
+                    var rental2 = await _rentalService.GetByRentalId(request.RentalId);
                     var rentalUnits = rental2.Units;
 
-                    //if (count >= _iRentalRepository.GetById(request.RentalId).Units)
-
-
-                    if (count >= rentalUnits) //And if more bookings are put against how many units are available the request fails.
+                    if (count >= rentalUnits) 
                     {
                         response.Message = "Not available";
                         response.ResourceIdViewModel = new ResourceIdViewModel() { Id = -2 };
@@ -78,10 +73,9 @@ namespace Services
 
                 Booking booking = new Booking()
                 {
-                    RentalId = request.RentalId,
                     Nights = request.NumberOfNigths,
                     Start = request.StartDate.Date,
-                    //Rental = rental //Once you add this, it throws a massive fucking error about duplicate entry.
+                    RentalId = request.RentalId
                 };
 
                 await _unitOfWork.BookingRepository.AddAsync(booking);

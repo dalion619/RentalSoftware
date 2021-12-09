@@ -36,8 +36,6 @@ namespace Services
                 return response;
             }
 
-            // The request should fail if overlapping between existing bookings and/ or their preparation times occurs due to a decrease of the number of units or an increase of the length of preparation time.
-            // If the length of preparation time is changed then it should be updated for all existing bookings
             foreach (var item in rental.BookingCollection)
             {
                 // Yet to do           
